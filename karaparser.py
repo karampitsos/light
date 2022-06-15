@@ -4,6 +4,9 @@ from typing import List, Tuple, Dict
 import csv
 import os
 import json
+from utils import tuple_of_bytes_to_string
+from datatypes import Identity, StrayLightconfig, ControlSettings, \
+    DarkCorrection, NonlinConfig, Smoothing
 
 
 class AvantesSpectra:
@@ -27,10 +30,7 @@ class AvantesSpectra:
     @property
     def marker(self) -> str:
         data: Tuple[bytes] = struct.unpack('ccccc', self.content[:5])
-        marker: str = ''
-        for d in data:
-            marker += d.decode()
-        
+        marker = tuple_of_bytes_to_string(data)
         return marker
 
     @property
@@ -65,28 +65,27 @@ class AvantesSpectra:
         return SDmarker[0]
 
     @property
-    def serial_number(self) -> str:
+    def identity(self) -> Identity:
+
         type = 'c'*10
         data: Tuple[bytes] = struct.unpack(type, self.content[14:24])
-        s = ''
-        for d in data:
-            s += d.decode()
-        return s
-    
-    @property 
-    def user_friendly_name(self) -> str:
+        
+        serial_number = tuple_of_bytes_to_string(data)
+        
         type = 'c'*64
         data: Tuple[bytes] = struct.unpack(type, self.content[24:88])
-        s = ''
-        for d in data:
-            s += d.decode()
         
-        return s
-
-    @property
-    def status(self) -> int:
+        user_friendly_name = tuple_of_bytes_to_string(data)
+        
         status = struct.unpack('B', self.content[88:89])
-        return status[0]
+        
+        identity = Identity(
+            serial_number=serial_number,
+            user_friendly_name=user_friendly_name,
+            status=status
+        )
+
+        return identity
 
     @property
     def detector_temp(self) -> float:
@@ -209,7 +208,10 @@ class AvantesSpectra:
                     'm_IntegrationTime': self.integration_time,
                     'm_IntegrationDelay': self.integration_delay,
                     'm_NrAverages': self.number_of_averages,
-                    'm_CorDynDark': '',
+                    'm_CorDynDark': {
+                        'm_Enable': '',
+                        'm_ForgetPercentage':''
+                    },
                     'm_Smoothing': '',
                     'm_SaturationDetection': '',
                     'm_Trigger': '',
@@ -227,7 +229,13 @@ class AvantesSpectra:
                 'xcoord': self.wavelenghts,
                 'scope': self.counts,
                 'dark': self.dark,
-                'reference': self.reference
+                'reference': self.reference,
+                'mergegroup': [],
+                'straylighconf': {},
+                'nonlinconf': {},
+                'CustomReflectance': '',
+                'CutomWhiteRefValue': {},
+                'CustomDarkRefValue': {}
                 }
             }
         return dictionary

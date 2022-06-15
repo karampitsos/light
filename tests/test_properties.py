@@ -50,14 +50,10 @@ def test_bitness(spectra: AvantesSpectra):
 def test_sdmaker(spectra: AvantesSpectra):
     assert spectra.sdmarker == 0
 
-def test_serial_number(spectra: AvantesSpectra):
-    assert spectra.serial_number == '1904175U1\x00'
-
-def test_status(spectra: AvantesSpectra):
-    assert spectra.status == 2
-
-def test_user_friendly_name(spectra: AvantesSpectra):
-    assert spectra.user_friendly_name == ''
+def test_identity(spectra: AvantesSpectra):
+    assert spectra.identity.user_friendly_name == ''
+    assert spectra.identity.serial_number == ''
+    assert spectra.identity.status == ''
 
 def test_detector_temp(spectra: AvantesSpectra):
     assert spectra.detector_temp == 0

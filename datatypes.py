@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+from typing import List
 
 @dataclass
 class Identity:
@@ -80,6 +80,10 @@ class Spectra:
     CalIntTime: float 
     fitdata: float 
     comment: str 
+    xcoord: List[float]
+    scope: List[float]
+    dark: List[float]
+    reference: List[float]
     mergegroup: str
     StrayLightconfig: StrayLightconfig
     NonlinConfig: NonlinConfig

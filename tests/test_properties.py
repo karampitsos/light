@@ -1,5 +1,5 @@
 import pytest
-from light.karaparser import AvantesSpectra
+from karaparser import AvantesSpectra
 from typing import List, Dict
 import csv
 

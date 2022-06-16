@@ -1,83 +1,67 @@
 from __future__ import annotations
 import struct
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 import csv
 import os
 import json
-from utils import tuple_of_bytes_to_string
 from datatypes import Identity, StrayLightconfig, ControlSettings, \
-    DarkCorrection, NonlinConfig, Smoothing
+    DarkCorrection, NonlinConfig, Smoothing, TriggerType
+
+from mapper import bytemapper, Data
 
 
 class AvantesSpectra:
-    def __init__(self, file_dir: str):
+    def __init__(self, file_dir: str, mapper: Dict[str, Data] = bytemapper):
         
         with open(file_dir, 'rb') as file:
             self.content = file.read()
 
-        self._current: int = 328
+        self._start_byte_of_dynamic_arrays: int = 328
+        self._pixels_of_dynamic_arrays: int = self.stop_pixel - self.start_pixel + 1
+        self._offset: int = self._start_byte_of_dynamic_arrays + self._pixels_of_dynamic_arrays*12
 
     @property    
     def start_pixel(self) -> int:
-        pixel = struct.unpack('H', self.content[89:91])
-        return pixel[0]
+        return bytemapper['m_StartPixel'].unpack(self.content)
 
     @property
     def stop_pixel(self) -> int:
-        pixel = struct.unpack('H', self.content[91:93])
-        return pixel[0]
+        return bytemapper['m_StopPixel'].unpack(self.content)
 
     @property
     def marker(self) -> str:
-        data: Tuple[bytes] = struct.unpack('ccccc', self.content[:5])
-        marker = tuple_of_bytes_to_string(data)
-        return marker
-
+        return bytemapper['marker'].unpack(self.content)
+        
     @property
     def measmode(self) -> int:
-        data = struct.unpack('B', self.content[11:12])
-        return data[0]
+        return bytemapper['measmode'].unpack(self.content)
 
     @property
     def numspectra(self) -> int:
-        numspectra = struct.unpack('B', self.content[5:6])
-        return numspectra[0]
+        return bytemapper['numspectra'].unpack(self.content)
 
     @property
     def length(self) -> int:
-        length = struct.unpack('I', self.content[6:10])
-        return length[0]
+        return bytemapper['length'].unpack(self.content)
 
     @property
     def seqnum(self) -> int:
-        seqnum = struct.unpack('B', self.content[10:11])
-        return seqnum[0]
+        return bytemapper['seqnum'].unpack(self.content)
 
     @property
     def bitness(self) -> int:
-        bitness = struct.unpack('B', self.content[12:13])
-        return bitness[0]
+        return bytemapper['bitness'].unpack(self.content)
 
     @property
     def sdmarker(self) -> int:
-        
-        SDmarker = struct.unpack('B', self.content[13:14])
-        return SDmarker[0]
+        return bytemapper['SDmarker'].unpack(self.content) 
 
     @property
     def identity(self) -> Identity:
 
-        type = 'c'*10
-        data: Tuple[bytes] = struct.unpack(type, self.content[14:24])
-        
-        serial_number = tuple_of_bytes_to_string(data)
-        
-        type = 'c'*64
-        data: Tuple[bytes] = struct.unpack(type, self.content[24:88])
-        
-        user_friendly_name = tuple_of_bytes_to_string(data)
-        
-        status = struct.unpack('B', self.content[88:89])
+        serial_number = bytemapper['serialNumber'].unpack(self.content)        
+        user_friendly_name = bytemapper['UserFriendlyName'].unpack(self.content)
+        status = bytemapper['status'].unpack(self.content)
         
         identity = Identity(
             serial_number=serial_number,
@@ -89,86 +73,153 @@ class AvantesSpectra:
 
     @property
     def detector_temp(self) -> float:
-        temp = struct.unpack('f', self.content[138:142])
-        return temp[0]
+        return bytemapper['detectortemp'].unpack(self.content)
     
     @property
     def board_temp(self) -> float:
-        temp = struct.unpack('f', self.content[142:146])
-        return temp[0]
+        return bytemapper['boardtemp'].unpack(self.content)
     
     @property
     def fit_data(self) -> List[float]:
-        data = struct.unpack('ddddd', self.content[158:198])
-        return list(data)
+        return bytemapper['fitdata'].unpack(self.content)
 
     @property
     def ntc2volt(self) -> float:
-        data = struct.unpack('f', self.content[146:150])
-        return data[0]
+        return bytemapper['NTC2volt'].unpack(self.content)
     
     @property
     def colortemp(self) -> float:
-        data = struct.unpack('f', self.content[150:154])
-        return data[0]
+        return bytemapper['ColorTemp'].unpack(self.content) 
     
     @property
     def calinttime(self) -> float:
-        data = struct.unpack('f', self.content[154:158])
-        return data[0]
+        return bytemapper['CalIntTime'].unpack(self.content)
 
     @property
     def integration_time(self) -> float:
-        time = struct.unpack('f', self.content[93:97])
-        return round(time[0], 2)
+        time = bytemapper['m_IntegrationTime'].unpack(self.content)
+        return round(time, 2)
 
     @property
     def integration_delay(self) -> int:
-        delay = struct.unpack('I', self.content[97:101])
-        return delay[0]
+        return bytemapper['m_IntegrationDelay'].unpack(self.content) 
 
     @property
     def number_of_averages(self):
-        number = struct.unpack('I', self.content[101:105])
-        return number[0]
+        return bytemapper['m_NrAverages'].unpack(self.content)
+    
+    @property
+    def dark_correction(self) -> DarkCorrection:
+        s = DarkCorrection(
+            bytemapper['m_enable'].unpack(self.content),
+            bytemapper['m_ForgetPercentage'].unpack(self.content)    
+        )
+        return s
+
+    @property 
+    def smoothing_type(self) -> Smoothing:
+        s = Smoothing(
+            bytemapper['m_SmoothPix'].unpack(self.content),
+            bytemapper['m_SmoothModel'].unpack(self.content),
+        )
+        return s
+    
+    @property
+    def saturation_detection(self) -> int:
+        return bytemapper['m_SaturationDetection'].unpack(self.content)
+
+    @property
+    def trigger_type(self) -> TriggerType:
+        s = TriggerType(
+            bytemapper['m_Mode'].unpack(self.content),
+            bytemapper['m_Source'].unpack(self.content),
+            bytemapper['m_SourceType'].unpack(self.content)
+        )
+
+        return s
+
+    @property
+    def control_settings(self) -> ControlSettings:
+        s = ControlSettings(
+            bytemapper['m_StrobeControl'].unpack(self.content),
+            bytemapper['m_LaserDelay'].unpack(self.content),
+            bytemapper['m_LaserWidth'].unpack(self.content),
+            bytemapper['m_LaserWaveLength'].unpack(self.content),
+            bytemapper['m_StoreToRam'].unpack(self.content),
+        )
+
+        return s
+
+    @property
+    def straylightconfig(self) -> StrayLightconfig:
+        
+        s = StrayLightconfig(
+            bytemapper['m_SLSSupported'].unpack(self.content, offset=self._offset),
+            bytemapper['m_SLSEnabled'].unpack(self.content, offset=self._offset),
+            bytemapper['m_SLSMultiFact'].unpack(self.content, offset=self._offset),
+            bytemapper['m_SLSError'].unpack(self.content, offset=self._offset)
+        )
+
+        return s
+    
+    @property
+    def nonlinconfig(self) -> NonlinConfig:
+
+        s = NonlinConfig(
+            bytemapper['m_NonlinSupported'].unpack(self.content, offset=self._offset),
+            bytemapper['m_NonlinEnabled'].unpack(self.content, offset=self._offset),
+            bytemapper['m_NonlinError'].unpack(self.content, offset=self._offset)
+        )
+
+        return s
 
     @property
     def wavelenghts(self) -> List[float]:
-        
-        pixel_numbers = self.stop_pixel - self.start_pixel + 1
-        type = 'f'*pixel_numbers
-        number = pixel_numbers*4 + self._current
+        type = 'f'*self._pixels_of_dynamic_arrays
+        start = self._start_byte_of_dynamic_arrays
+        end = self._pixels_of_dynamic_arrays*4 + self._start_byte_of_dynamic_arrays
 
-        wave =  struct.unpack(type, self.content[self._current:number])
+        wave =  struct.unpack(type, self.content[start:end])
         return list(wave)
     
     @property
     def counts(self) -> List[float]:
-        pixel_numbers = self.stop_pixel - self.start_pixel + 1
-        type = 'f'*pixel_numbers
-        start = self._current + pixel_numbers*4
-        end = self._current + pixel_numbers*8
+        type = 'f'*self._pixels_of_dynamic_arrays        
+        start = self._start_byte_of_dynamic_arrays + self._pixels_of_dynamic_arrays*4
+        end = self._start_byte_of_dynamic_arrays + self._pixels_of_dynamic_arrays*8
+        
         c = struct.unpack(type, self.content[start:end])
         return list(c)
     
     @property
     def dark(self) -> List[float]:
-        pixel_numbers = self.stop_pixel - self.start_pixel + 1
-        type = 'f'*pixel_numbers
-        start = self._current + pixel_numbers*8
-        end = self._current + pixel_numbers*12
+        type = 'f'*self._pixels_of_dynamic_arrays
+        start = self._start_byte_of_dynamic_arrays + self._pixels_of_dynamic_arrays*8
+        end = self._start_byte_of_dynamic_arrays + self._pixels_of_dynamic_arrays*12
+    
         c = struct.unpack(type, self.content[start:end])
-        return c
+        return list(c)
      
     @property
     def reference(self) -> List[float]:
-        pixel_numbers = self.stop_pixel - self.start_pixel + 1
-        type = 'f'*pixel_numbers
-        start = self._current + pixel_numbers*12
-        end = self._current + pixel_numbers*16
+        type = 'f'*self._pixels_of_dynamic_arrays
+        start = self._start_byte_of_dynamic_arrays + self._pixels_of_dynamic_arrays*12
+        end = self._start_byte_of_dynamic_arrays + self._pixels_of_dynamic_arrays*16
         c = struct.unpack(type, self.content[start:end])
-        return c
+        return list(c)
     
+    @property
+    def custom_reflectance(self) -> bool:
+        return bytemapper['CustomReflectance'].unpack(self.content, offset=self._offset)
+    
+    @property
+    def custom_white_ref_value(self) -> List[float]:
+        return bytemapper['CustomWhiteRefValue'].unpack(self.content, offset=self._offset)
+    
+    @property
+    def custom_dark_ref_value(self) -> List[float]:
+        return bytemapper['CustomDarkRefValue'].unpack(self.content, offset=self._offset)
+
     def to_csv(self, file_dir: str, delimiter: str = ',') -> None:
         with open(file_dir, 'w') as file:
             writer = csv.writer(file, delimiter=delimiter)

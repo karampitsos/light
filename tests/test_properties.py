@@ -68,10 +68,10 @@ def test_ntc2volt(spectra: AvantesSpectra):
     assert spectra.ntc2volt == 0
 
 def test_colortemp(spectra: AvantesSpectra):
-    assert spectra.colortemp == 2850
+    assert spectra.color_temp == 2850
 
 def test_calinttime(spectra: AvantesSpectra):
-    assert spectra.calinttime == 0
+    assert spectra.cal_int_time == 0
 
 def test_integration_time(spectra: AvantesSpectra):
     assert spectra.integration_time == 1.05

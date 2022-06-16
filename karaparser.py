@@ -4,14 +4,15 @@ from typing import List, Tuple, Dict, Optional
 import csv
 import os
 import json
+from dataclasses import asdict
 from datatypes import Identity, StrayLightconfig, ControlSettings, \
-    DarkCorrection, NonlinConfig, Smoothing, TriggerType
+    DarkCorrection, NonlinConfig, Smoothing, Trigger, Spectra
 
 from mapper import bytemapper, Data
 
 
 class AvantesSpectra:
-    def __init__(self, file_dir: str, mapper: Dict[str, Data] = bytemapper):
+    def __init__(self, file_dir: str, bytemapper: Dict[str, Data] = bytemapper):
         
         with open(file_dir, 'rb') as file:
             self.content = file.read()
@@ -88,11 +89,11 @@ class AvantesSpectra:
         return bytemapper['NTC2volt'].unpack(self.content)
     
     @property
-    def colortemp(self) -> float:
+    def color_temp(self) -> float:
         return bytemapper['ColorTemp'].unpack(self.content) 
     
     @property
-    def calinttime(self) -> float:
+    def cal_int_time(self) -> float:
         return bytemapper['CalIntTime'].unpack(self.content)
 
     @property
@@ -117,7 +118,7 @@ class AvantesSpectra:
         return s
 
     @property 
-    def smoothing_type(self) -> Smoothing:
+    def smoothing(self) -> Smoothing:
         s = Smoothing(
             bytemapper['m_SmoothPix'].unpack(self.content),
             bytemapper['m_SmoothModel'].unpack(self.content),
@@ -129,8 +130,8 @@ class AvantesSpectra:
         return bytemapper['m_SaturationDetection'].unpack(self.content)
 
     @property
-    def trigger_type(self) -> TriggerType:
-        s = TriggerType(
+    def trigger(self) -> Trigger:
+        s = Trigger(
             bytemapper['m_Mode'].unpack(self.content),
             bytemapper['m_Source'].unpack(self.content),
             bytemapper['m_SourceType'].unpack(self.content)
@@ -149,9 +150,17 @@ class AvantesSpectra:
         )
 
         return s
+    
+    @property
+    def timestamp(self) -> str:
+        return bytemapper['timestamp'].unpack(self.content)
+    
+    @property
+    def spc_filedate(self) -> str:
+        return bytemapper['SPCfiledate'].unpack(self.content)
 
     @property
-    def straylightconfig(self) -> StrayLightconfig:
+    def stray_light_config(self) -> StrayLightconfig:
         
         s = StrayLightconfig(
             bytemapper['m_SLSSupported'].unpack(self.content, offset=self._offset),
@@ -163,7 +172,7 @@ class AvantesSpectra:
         return s
     
     @property
-    def nonlinconfig(self) -> NonlinConfig:
+    def non_lin_config(self) -> NonlinConfig:
 
         s = NonlinConfig(
             bytemapper['m_NonlinSupported'].unpack(self.content, offset=self._offset),
@@ -172,6 +181,10 @@ class AvantesSpectra:
         )
 
         return s
+
+    @property
+    def comment(self) -> str:
+        return bytemapper['comment'].unpack(self.content)
 
     @property
     def wavelenghts(self) -> List[float]:
@@ -209,6 +222,10 @@ class AvantesSpectra:
         return list(c)
     
     @property
+    def mergegroup(self) -> str:
+        return bytemapper['mergegroup'].unpack(self.content, offset=self._offset)
+    
+    @property
     def custom_reflectance(self) -> bool:
         return bytemapper['CustomReflectance'].unpack(self.content, offset=self._offset)
     
@@ -237,60 +254,23 @@ class AvantesSpectra:
             file.write(json.dumps(dictionary, indent=2))
 
     def to_dict(self) -> Dict:
-        dictionary = {
-            'avs8header': {
-                'marker': self.marker,
-                'numspectra': self.numspectra,
-                },
-            'avs8spectrum': {
-                'length': self.length,
-                'seqnum': self.seqnum,
-                'measmode': self.measmode,
-                'bitness': self.bitness,
-                'SDmarker': self.sdmarker,
-                'identity': {
-                    'SerialNumber': self.serial_number,
-                    'UserFriendlyName': self.user_friendly_name,
-                    'Status': self.status
-                },
-                'measconf': {
-                    'm_StartPixel': self.start_pixel,
-                    'm_StopPixel': self.stop_pixel,
-                    'm_IntegrationTime': self.integration_time,
-                    'm_IntegrationDelay': self.integration_delay,
-                    'm_NrAverages': self.number_of_averages,
-                    'm_CorDynDark': {
-                        'm_Enable': '',
-                        'm_ForgetPercentage':''
-                    },
-                    'm_Smoothing': '',
-                    'm_SaturationDetection': '',
-                    'm_Trigger': '',
-                    'm_Control': '' 
-                },
-                'timestamp': '',
-                'SPCfiledate': '',
-                'detectortemp': self.detector_temp,
-                'boardtemp': self.board_temp,
-                'NTC2volt': self.ntc2volt,
-                'ColorTemp': self.colortemp,
-                'CalIntTime': self.calinttime,
-                'fitdata': self.fit_data,
-                'comment': '',
-                'xcoord': self.wavelenghts,
-                'scope': self.counts,
-                'dark': self.dark,
-                'reference': self.reference,
-                'mergegroup': [],
-                'straylighconf': {},
-                'nonlinconf': {},
-                'CustomReflectance': '',
-                'CutomWhiteRefValue': {},
-                'CustomDarkRefValue': {}
-                }
-            }
-        return dictionary
 
+        spectra = Spectra(self.marker, self.numspectra,self.length,
+            self.seqnum, self.measmode, self.bitness, self.sdmarker,
+            self.identity, self.start_pixel, self.stop_pixel,
+            self.integration_time, self.integration_delay,
+            self.number_of_averages, self.dark_correction,
+            self.smoothing, self.saturation_detection,
+            self.trigger, self.control_settings, self.timestamp,
+            self.spc_filedate ,self.detector_temp,  
+            self.board_temp, self.ntc2volt ,self.color_temp,
+            self.cal_int_time, self.fit_data ,self.comment, 
+            self.mergegroup,self.stray_light_config, self.non_lin_config,
+            self.custom_reflectance, self.custom_white_ref_value,
+            self.custom_dark_ref_value
+        )
+
+        return asdict(spectra)
 
     @classmethod
     def from_folder(cls, folder_dir: str) -> List[AvantesSpectra]:

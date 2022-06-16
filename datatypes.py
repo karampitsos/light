@@ -26,7 +26,7 @@ class ControlSettings:
 
 
 @dataclass 
-class TriggerType:
+class Trigger:
     m_Mode: int
     m_Source: int
     m_SourceType: int
@@ -49,3 +49,40 @@ class DarkCorrection:
 class Smoothing:
     m_SmoothPix: int
     m_SmoothModel: int
+
+
+@dataclass
+class Spectra:
+    marker: str
+    numspectra: int
+    length: int
+    seqnum: int
+    measmode: int
+    bitness: int
+    SDmarker: int
+    Indentity: Identity
+    m_StartPixel: int
+    m_StopPixel: int
+    m_IntegrationTime: float
+    m_IntegrationDelay: int
+    m_NrAverages: int
+    DarkCorrection: DarkCorrection
+    Smoothing: Smoothing
+    m_SaturationDetection: int
+    Trigger: Trigger
+    ControlSettings: ControlSettings
+    timestamp: str
+    SPCfiledate: str 
+    detectortemp: float 
+    boardtemp: float 
+    NTC2volt: float 
+    ColorTemp: float 
+    CalIntTime: float 
+    fitdata: float 
+    comment: str 
+    mergegroup: str
+    StrayLightconfig: StrayLightconfig
+    NonlinConfig: NonlinConfig
+    CustomReflectance: bool
+    CustomWhiteRefValue: float
+    CustomDarkValue: float

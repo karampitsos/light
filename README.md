@@ -1,9 +1,18 @@
 # phos
 
-This is a library to read raw8 files
+Phos is a Python library for dealing with the parsing files from spectrometry
+cameras. Currently support only raw8 files.
 
+## Installation
+Use the package manager [pip](https://pip.pypa.io/en/stable/) to install Phos.
 
+```bash
+pip install phos
 ```
+
+## Basic Usage
+
+```python
 from phos import AvantesSpectra
 
 

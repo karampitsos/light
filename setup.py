@@ -37,3 +37,4 @@ setup(
 #python3 -m twine upload --repository testpypi dist/*
 #for production
 #python3 -m twine upload dist/*
+#pip install -i https://test.pypi.org/simple/ phos==0.0.1

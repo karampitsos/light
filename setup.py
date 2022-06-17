@@ -6,7 +6,7 @@ with open("README.md", 'r') as file:
 
 setup(
     name='phos',
-    version='0.0.1',
+    version='0.0.4',
     description='This is a raw8 parser',
     long_description=readme,
     long_description_content_type="text/markdown",

@@ -1,1 +1,1 @@
-from .parser import AvantesSpectra as AvantesSpectra
+from .parser import Raw8Spectra as Raw8Spectra

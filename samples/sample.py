@@ -1,8 +1,8 @@
-from phos import AvantesSpectra
+from phos import Raw8Spectra
 import matplotlib.pyplot as plt
 
 
-spectra = AvantesSpectra('../input/example.raw8')
+spectra = Raw8Spectra('../input/example.raw8')
 print(f'integration time: {spectra.integration_time}')
 print(f'integration delay: {spectra.integration_delay}')
 plt.plot(spectra.wavelenghts, spectra.counts)

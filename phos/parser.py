@@ -10,7 +10,7 @@ from phos.datatypes import Identity, StrayLightconfig, ControlSettings, \
 from phos.mapper import bytemapper, Data
 
 
-class AvantesSpectra:
+class Raw8Spectra:
 
     bytemapper: Dict[str, Data] = bytemapper
 
@@ -291,9 +291,9 @@ class AvantesSpectra:
         return spectra
 
     @classmethod
-    def from_folder(cls, folder_dir: str) -> List[AvantesSpectra]:
+    def from_folder(cls, folder_dir: str) -> List[Raw8Spectra]:
         files = os.listdir(folder_dir)
-        spectrums: List[AvantesSpectra] = []
+        spectrums: List[Raw8Spectra] = []
         for file_dir in files:
             spectra = cls(file_dir)
             spectrums.append(spectra)

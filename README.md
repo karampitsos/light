@@ -12,16 +12,16 @@ pip install phos
 
 ## Basic Usage
 
-To parse a raw8 file, initialize a AvantesSpectra instance
+To parse a raw8 file, initialize a Raw8Spectra instance
 passing the file directory. 
 
 ```python
-from phos import AvantesSpectra
+from phos import Raw8Spectra
 
-spectra = AvantesSpectra('input.raw8')
+spectra = Raw8Spectra('input.raw8')
 ```
 
-The AvantesSpectra instance has all the attributes of the raw8 file.
+The Raw8Spectra instance has all the attributes of the raw8 file.
 
 ```python
 print(f'integration time: {spectra.integration_time}')

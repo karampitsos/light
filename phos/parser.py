@@ -5,9 +5,9 @@ import csv
 import os
 import json
 from dataclasses import asdict
-from datatypes import Identity, StrayLightconfig, ControlSettings, \
+from phos.datatypes import Identity, StrayLightconfig, ControlSettings, \
     DarkCorrection, NonlinConfig, Smoothing, Trigger, Spectra
-from mapper import bytemapper, Data
+from phos.mapper import bytemapper, Data
 
 
 class AvantesSpectra:
@@ -239,16 +239,25 @@ class AvantesSpectra:
     def custom_dark_ref_value(self) -> List[float]:
         return self.bytemapper['CustomDarkRefValue'].unpack(self.content, offset=self._offset)
 
-    def to_csv(self, file_dir: str, delimiter: str = ',') -> None:
+    def to_csv(self, file_dir: str, delimiter: str = ',', detailed: bool = False) -> None:
         with open(file_dir, 'w') as file:
             writer = csv.writer(file, delimiter=delimiter)
-            header = ['wavelenght', 'counts']
-            writer.writerow(header)
-            data = [
-                [wavelenght, self.counts[i], self.dark[i], self.reference[i]] 
-                for i, wavelenght in enumerate(self.wavelenghts)
-                ]
-            writer.writerows(data)
+            if detailed:
+                header = ['wavelenght', 'counts', 'dark', 'reference']
+                writer.writerow(header)
+                data = [
+                    [wavelenght, self.counts[i], self.dark[i], self.reference[i]] 
+                    for i, wavelenght in enumerate(self.wavelenghts)
+                    ]
+                writer.writerows(data)
+            else:
+                header = ['wavelenght', 'counts']
+                writer.writerow(header)
+                data = [
+                    [wavelenght, self.counts[i]] 
+                    for i, wavelenght in enumerate(self.wavelenghts)
+                    ]
+                writer.writerows(data)
     
     def to_json(self, file_dir: str) -> None:
         with open(file_dir, 'w') as file:
@@ -257,6 +266,12 @@ class AvantesSpectra:
 
     def to_dict(self) -> Dict:
 
+        spectra = self.to_dataclass()
+
+        return asdict(spectra)
+
+    def to_dataclass(self) -> Spectra:
+        
         spectra = Spectra(self.marker, self.numspectra,self.length,
             self.seqnum, self.measmode, self.bitness, self.sdmarker,
             self.identity, self.start_pixel, self.stop_pixel,
@@ -273,7 +288,7 @@ class AvantesSpectra:
             self.custom_dark_ref_value
         )
 
-        return asdict(spectra)
+        return spectra
 
     @classmethod
     def from_folder(cls, folder_dir: str) -> List[AvantesSpectra]:

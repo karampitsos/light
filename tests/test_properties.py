@@ -1,5 +1,5 @@
 import pytest
-from karaparser import AvantesSpectra
+from phos.karaparser import AvantesSpectra
 from typing import List
 import csv
 

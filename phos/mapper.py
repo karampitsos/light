@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import struct
 from typing import List, Any
-from utils import tuple_of_bytes_to_string
+from phos.utils import tuple_of_bytes_to_string
 
 @dataclass
 class Data:

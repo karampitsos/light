@@ -1,7 +1,7 @@
 # phos
 
-Phos is a Python library for dealing with the parsing files from spectrometry
-cameras. Currently support only raw8 files.
+Phos is a user-friendly Python library for dealing with the parsing of spectrometry data
+and retrieve the spectral data and the metadata. Currently support only raw8 files.
 
 ## Installation
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install Phos.

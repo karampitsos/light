@@ -58,6 +58,7 @@ spectra.to_json('test.json')
 ```
 
 ## Advanced Usage
+### Manage multiple files
 
 In order to parse multiple files you can use the from_folder function.
 
@@ -65,9 +66,30 @@ In order to parse multiple files you can use the from_folder function.
 from phos import Raw8Spectra
 
 spectras: List[Raw8Spectra] = Raw8Spectra.from_folder(folder_dir)
+```
+
+In order to export the data to csv or json format files you can use.
+
+```python
 
 spectras.many_to_csv()
 
 spectras.many_to_json()
 
+```
+
+### Dark and reference
+
+In order to access the dark and reference of a measurement.
+
+```python
+dark = spectra.dark
+reference = spectra.reference
+
+```
+
+Export csv with dark and reference
+
+```python
+spectra.to_csv(file.csv, details=True)
 ```

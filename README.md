@@ -5,9 +5,9 @@ Currently support only raw8 files.
 In order to analyze source data from a spectrometry device
 utilizing powerful python libraries such as pandas, numpy, scipy, scikit-learn
 you have to export the data in a csv format and afterwords analyze it with this format.
-This library offers the possibility to using directly the source files
+This library offers the ability to use the source files directly
 and save a great amount of time and resources
-especially if there are a big number of spectras waiting for analysis.
+especially if there is a big number of spectras waiting for analysis.
 
 ## Installation
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install Phos.
@@ -18,8 +18,8 @@ pip install phos
 
 ## Basic Usage
 
-To parse a raw8 file, initialize a Raw8Spectra instance
-passing the file directory. 
+In order to parse a raw8 file, you have to initialize a Raw8Spectra instance
+passing the file directory.
 
 ```python
 from phos import Raw8Spectra
@@ -27,7 +27,7 @@ from phos import Raw8Spectra
 spectra = Raw8Spectra('input.raw8')
 ```
 
-The attributes of a raw8 files is accesed by properties of the instance of`Raw8spectra` class.
+The attributes of a raw8 files is accessed by properties of the instance of`Raw8spectra` class.
 
 ```python
 integration_time = spectra.integration_time
